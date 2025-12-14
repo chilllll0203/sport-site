@@ -1,0 +1,47 @@
+
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 500px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 30px;
+        }
+
+        form {
+    width: 350px;            /* фиксированная ширина формы */
+    margin: 0 auto;          /* центрирование на странице */
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;  /* label над input */
+    margin-bottom: 15px;     /* расстояние между полями */
+}
+
+.form-group label {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.form-group input {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    width: 100%;             /* ВСЕ поля одной ширины */
+    box-sizing: border-box;
+}
+
+.submit-btn {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    background: black;
+    color: white;
+    border-radius: 8px;
+    cursor: pointer;
+}
