@@ -20,17 +20,6 @@ class User(db.Model):
     def __repr__(self):
         return '<User %r>' % self.id
 
-    def to_dict(self):
-        return {
-            "id": self.id,
-            "name": self.name,
-            "age": self.age,
-            "email": self.email,
-            "password": self.password,
-            "height": self.height,
-            "weight": self.weight
-        }
-
 @app.route('/',methods=['GET', 'POST'])
 def index():
     if request.method == 'POST':
@@ -54,10 +43,10 @@ def reg():
         email = request.form['email']
         name = request.form['name']
         age = request.form['age']
-        password = request.form['password'].encode()
+        password = request.form['password'].encode("utf-8")
 
         hash_password = bcrypt.hashpw(password,bcrypt.gensalt())
-
+        print(hash_password)
         user = User(email=email,name=name,age=age,password=hash_password)
         try:
             if "register_btn" in request.form:
@@ -80,7 +69,9 @@ def training():
 @app.route('/userstable')
 def userstable():
     users = User.query.all()
-    return jsonify([user.to_dict() for user in users])
-
+    list = []
+    for user in users:
+        list.append(f"ID:{user.id} NAME:{user.name} AGE:{user.age} PASSWORD:{user.password}")
+    return jsonify(list)
 if __name__ == '__main__':
     app.run(debug=True)
