@@ -34,11 +34,12 @@ def index():
         email = request.form['email']
         password = request.form['password']
         try:
-            is_User = User.query.filter_by(email=email, password=password).first()
-            if is_User:
-                return redirect('/training')
-            else:
-                return "Произошла ошибка!"
+            if "sum_btn" in request.form:
+                is_User = User.query.filter_by(email=email, password=password).first()
+                if is_User:
+                    return redirect('/training')
+                else:
+                    return "Произошла ошибка!"
         except Exception as e:
             return e
     return render_template('index.html')
