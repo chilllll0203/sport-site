@@ -1,5 +1,7 @@
 from flask import Flask, render_template,url_for,request,redirect,jsonify
 from flask_sqlalchemy import SQLAlchemy
+import bcrypt
+
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
@@ -24,6 +26,7 @@ class User(db.Model):
             "name": self.name,
             "age": self.age,
             "email": self.email,
+            "password": self.password,
             "height": self.height,
             "weight": self.weight
         }
@@ -35,9 +38,10 @@ def index():
         password = request.form['password']
         try:
             if "sum_btn" in request.form:
-                is_User = User.query.filter_by(email=email, password=password).first()
+                is_User = User.query.filter_by(email=email).first()
                 if is_User:
-                    return redirect('/training')
+                    if bcrypt.checkpw(password.encode(),is_User.password):
+                        return redirect('/training')
                 else:
                     return "Произошла ошибка!"
         except Exception as e:
@@ -50,9 +54,11 @@ def reg():
         email = request.form['email']
         name = request.form['name']
         age = request.form['age']
-        password = request.form['password']
+        password = request.form['password'].encode()
 
-        user = User(email=email,name=name,age=age,password=password)
+        hash_password = bcrypt.hashpw(password,bcrypt.gensalt())
+
+        user = User(email=email,name=name,age=age,password=hash_password)
         try:
             if "register_btn" in request.form:
                 db.session.add(user)
