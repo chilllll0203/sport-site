@@ -1,8 +1,6 @@
 from flask import Flask, render_template,url_for,request,redirect,jsonify
 from flask_sqlalchemy import SQLAlchemy
 import bcrypt
-
-
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
 db = SQLAlchemy(app)
@@ -73,5 +71,20 @@ def userstable():
     for user in users:
         users_list.append(f"ID:{user.id} NAME:{user.name} AGE:{user.age} PASSWORD:{user.password}")
     return jsonify(users_list)
+@app.route('/test_train',methods=['GET', 'POST'])
+def test_train():
+    print("Вы перешли на страницу с тестом")
+@app.route('/train',methods=['GET', 'POST'])
+def train():
+    print("Вы перешли на страницу с вашими тренировками")
+@app.route('/profile',methods=['GET', 'POST'])
+def profile():
+    print("Вы перешли на страницу с вашим профилем")
+@app.route('/add_water',methods=['GET', 'POST'])
+def add_water():
+    print("Вы перешли на страницу с добавление воды")
+@app.route('/add_calories',methods=['GET', 'POST'])
+def add_calories():
+    print("Вы перешли на страницу с добавление калорий")
 if __name__ == '__main__':
     app.run(debug=True)
