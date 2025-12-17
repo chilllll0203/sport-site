@@ -5,10 +5,30 @@
     <meta name="viewport"
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <link rel="stylesheet" href="{{url_for('static',filename='css/index.css')}}">
+    <link rel="stylesheet" href="{{url_for('static',filename='css/training.css')}}">
     <title>Личный кабинет</title>
 </head>
 <body>
-    <h1>Вы внутри!</h1>
+    <div class="app">
+        <div class="card">
+            <h2>Твои тренировки</h2>
+            <button class="btn primary">Перейти</button>
+            <div class="tracker">
+                <h3>Учет каллорий и выпитой воды</h3>
+                <p><strong>Вода:</strong> 0 / 2000</p>
+                <p><strong>Калории:</strong> 0 / 2000</p>
+                <button class="btn secondary">Добавить воду</button>
+                <button class="btn secondary">Добавить каллории</button>
+            </div>
+        </div>
+        <button class="btn wide">Пройти тест по подбору тренировки</button>
+        <div class="bottom-nav">
+            <button class="nav-item" name="button_main">Главная</button>
+            <button class="nav-center" name="button_addtrain">
+                +
+            </button>
+            <button class="nav-item" name="button_profile">Профиль</button>
+        </div>
+    </div>
 </body>
 </html>

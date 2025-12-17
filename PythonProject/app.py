@@ -34,7 +34,7 @@ def index():
                 else:
                     return "Произошла ошибка!"
         except Exception as e:
-            return e
+            print(e)
     return render_template('index.html')
 
 @app.route('/reg', methods=['GET', 'POST'])
@@ -54,7 +54,7 @@ def reg():
                 db.session.commit()
                 return redirect('/')
         except Exception as e:
-            return e
+            print(e)
 
     else:
         return render_template('reg.html')
@@ -62,16 +62,16 @@ def reg():
 @app.route('/training',methods=['GET', 'POST'])
 def training():
     if request.method == 'POST':
-        pass
+        render_template('training.html')
     else:
         return render_template('training.html')
 
 @app.route('/userstable')
 def userstable():
     users = User.query.all()
-    list = []
+    users_list = []
     for user in users:
-        list.append(f"ID:{user.id} NAME:{user.name} AGE:{user.age} PASSWORD:{user.password}")
-    return jsonify(list)
+        users_list.append(f"ID:{user.id} NAME:{user.name} AGE:{user.age} PASSWORD:{user.password}")
+    return jsonify(users_list)
 if __name__ == '__main__':
     app.run(debug=True)

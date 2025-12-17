@@ -1,0 +1,91 @@
+* {
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+body {
+    margin: 0;
+    background: #e5e5e5;
+    display: flex;
+    justify-content: center;
+}
+.app{
+    width: 360px;
+    min-height: 100vh;
+    background: #f2f2f2;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+.card{
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 20px;
+}
+.card h2{
+    margin-top: 0;
+}
+.tracker {
+    background: #d9d9d9;
+    border-radius: 12px;
+    padding: 15px;
+    margin-top: 15px;
+}
+.tracker h3{
+    margin-top: 0;
+}
+.btn {
+    border: none;
+    border-radius: 25px;
+    padding: 12px;
+    margin-top: 10px;
+    font-size: 14px;
+    cursor: pointer;
+}
+.btn.primary{
+    width: 100%;
+    background: #d89b2a;
+    color: white;
+}
+.btn.secondary{
+    width: 100%;
+    background: #e3a62d;
+    color: white;
+}
+.btn.wide{
+    background: #d89b2a;
+    color: white;
+    margin: 20px 0;
+}
+.bottom-nav{
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 30px;
+    background: #ffffff;
+    border-radius: 20px;
+}
+.nav-item{
+    background: transparent;
+    border: none;
+    color: black;
+    cursor: pointer;
+    font-weight: bold;
+}
+.nav-center{
+    position: absolute;
+    left: 50%;
+    top: -25px;
+    transform: translateX(-50%);
+    width: 55px;
+    height: 55px;
+    background: #000;
+    color: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    cursor: pointer;
+}
