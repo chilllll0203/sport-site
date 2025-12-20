@@ -60,7 +60,18 @@ def reg():
 @app.route('/training',methods=['GET', 'POST'])
 def training():
     if request.method == 'POST':
-        render_template('training.html')
+        if "button_test" in request.form:
+            return redirect('/test_train')
+        elif "button_train" in request.form:
+            return redirect('/train')
+        elif "button_addWater" in request.form:
+            return redirect('/add_water')
+        elif "button_addCalories" in request.form:
+            return redirect('/add_calories')
+        elif "button_profile" in request.form:
+            return redirect('/profile')
+        elif "button_main" in request.form:
+            return render_template('training.html')
     else:
         return render_template('training.html')
 

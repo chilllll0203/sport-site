@@ -9,26 +9,28 @@
     <title>Личный кабинет</title>
 </head>
 <body>
-    <div class="app">
-        <div class="card">
+    <form method="post">
+        <div class="app">
+            <div class="card">
             <h2>Твои тренировки</h2>
-            <button class="btn primary">Перейти</button>
+            <button class="btn primary" name="button_train">Перейти</button>
             <div class="tracker">
                 <h3>Учет каллорий и выпитой воды</h3>
                 <p><strong>Вода:</strong> 0 / 2000</p>
                 <p><strong>Калории:</strong> 0 / 2000</p>
-                <button class="btn secondary">Добавить воду</button>
-                <button class="btn secondary">Добавить каллории</button>
+                <button class="btn secondary" name="button_addWater">Добавить воду</button>
+                <button class="btn secondary" name="button_addCalories">Добавить каллории</button>
             </div>
         </div>
-        <button class="btn wide">Пройти тест по подбору тренировки</button>
+        <button class="btn wide" name="button_test">Пройти тест по подбору тренировки</button>
         <div class="bottom-nav">
             <button class="nav-item" name="button_main">Главная</button>
-            <button class="nav-center" name="button_addtrain">
+            <button class="nav-center" name="button_train">
                 +
             </button>
             <button class="nav-item" name="button_profile">Профиль</button>
+            </div>
         </div>
-    </div>
+    </form>
 </body>
 </html>
