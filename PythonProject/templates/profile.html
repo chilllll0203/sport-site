@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="{{url_for('static',filename='css/profile.css')}}">
+    <title>Профиль</title>
+</head>
+<body>
+    <form method="post">
+        <div class="app">
+            <div class="card profile_info">
+                <div class="profile-header">
+                    <h2>{{username}}</h2>
+                    <p class="email">{{email}}</p>
+                </div>
+                <div class="profile-info">
+                    <p><span>Ваш возраст: </span>{{age}}</p>
+                    <p><span>Ваш рост: </span>{{height}}</p>
+                    <p><span>Ваш вес: </span>{{weight}}</p>
+                </div>
+                <button class="button_exit" name="button_exit">Выйти из профиля</button>
+            </div>
+            <div class="bottom-nav">
+            <button class="nav-item" name="button_main">Главная</button>
+            <button class="nav-center" name="button_train">
+                +
+            </button>
+            <button class="nav-item" name="button_profile">Профиль</button>
+            </div>
+        </div>
+    </form>
+</body>
+</html>
