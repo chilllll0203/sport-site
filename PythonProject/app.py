@@ -31,6 +31,7 @@ class User(db.Model):
         self.weight = weight
     def __repr__(self):
         return '<User %r>' % self.id
+
 class TestAnswer(db.Model):
     __tablename__ = 'test_answers'
     id = db.Column(db.Integer, primary_key=True)
@@ -39,6 +40,12 @@ class TestAnswer(db.Model):
     answer2 = db.Column(db.String(200))
     answer3 = db.Column(db.String(200))
     user = db.relationship('User',foreign_keys=[user_id])
+    def __init__(self,user_id,answer1,answer2,answer3):
+        self.user_id = user_id
+        self.answer1 = answer1
+        self.answer2 = answer2
+        self.answer3 = answer3
+
 class WaterUser(db.Model):
     __tablename__ = 'water_users'
     id = db.Column(db.Integer, primary_key=True)
@@ -50,6 +57,7 @@ class WaterUser(db.Model):
         self.user_id = user_id
         self.date = date
         self.count = count
+
 class CaloriesUser(db.Model):
     __tablename__ = 'calories_users'
     id = db.Column(db.Integer, primary_key=True)
@@ -57,17 +65,24 @@ class CaloriesUser(db.Model):
     date = db.Column(db.DateTime,default=datetime.utcnow)
     count = db.Column(db.Integer,default=0)
     user = db.relationship('User',foreign_keys=[user_id])
+    def __init__(self,user_id,date,count):
+        self.user_id = user_id
+        self.date = date
+        self.count = count
+
 class WeeklyProgram(db.Model):
     __tablename__ = 'weekly_programs'
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'),nullable=False)
     user = db.relationship('User',foreign_keys=[user_id])
+
 class TrainingDay(db.Model):
     __tablename__ = 'training_days'
     id = db.Column(db.Integer, primary_key=True)
     program_id = db.Column(db.Integer, db.ForeignKey('weekly_programs.id'),nullable=False)
     day_of_week = db.Column(db.String(20),nullable=False)
     program = db.relationship('WeeklyProgram',foreign_keys=[program_id])
+
 class Exercise(db.Model):
     __tablename__ = 'exercises'
     id = db.Column(db.Integer, primary_key=True)
@@ -76,6 +91,7 @@ class Exercise(db.Model):
     sets = db.Column(db.Integer,nullable=False)
     reps = db.Column(db.Integer,nullable=False)
     training_day = db.relationship('TrainingDay',foreign_keys=[training_id])
+
 
 @app.route('/',methods=['GET', 'POST'])
 def index():
@@ -160,10 +176,32 @@ def users_water_table():
     for user_water in users_water:
         water_list.append(f"ID:{user_water.id} ID USER: {user_water.user_id} DATE: {user_water.date} COUNT: {user_water.count}")
     return jsonify(water_list)
+
+@app.route('/users_calories')
+def users_calories_table():
+    users_calories = CaloriesUser.query.all()
+    calories_list = []
+    for user_water in users_calories:
+        calories_list.append(f"ID:{user_water.id} ID USER: {user_water.user_id} DATE: {user_water.date} COUNT: {user_water.count}")
+    return jsonify(calories_list)
+
 @app.route('/test_train',methods=['GET', 'POST'])
-async def test_train():
-    print("Вы перешли на страницу с тестом")
-    return await jsonify("Вы перешли на страницу с тестом")
+def test_train():
+    if request.method == 'POST':
+        if "button_addTest" in request.form:
+            answer1 = request.form['answer1']
+            answer2 = request.form['answer2']
+            answer3 = request.form['answer3']
+            data = session.get('user')
+            id_user = data['id']
+            test_user = TestAnswer(id_user, answer1, answer2, answer3)
+            try:
+                db.session.add(test_user)
+                db.session.commit()
+                return redirect('/training')
+            except Exception as e:
+                return jsonify(e)
+    return render_template('test_train.html')
 
 @app.route('/train',methods=['GET', 'POST'])
 def train():
@@ -202,7 +240,19 @@ def add_water():
 
 @app.route('/add_calories',methods=['GET', 'POST'])
 def add_calories():
-    print("Вы перешли на страницу с добавление калорий")
-
+    if request.method == 'POST':
+        if "button_addCalories" in request.form:
+            data = session.get('user')
+            user_id = data['id']
+            date_calories = datetime.now()
+            calories_count = request.form.get('count_calories')
+            calories_user = CaloriesUser(user_id,date_calories,calories_count)
+            try:
+                db.session.add(calories_user)
+                db.session.commit()
+                return redirect('/training')
+            except Exception as e:
+                return jsonify(e)
+        return render_template('callories.html')
 if __name__ == '__main__':
     app.run(debug=True)
