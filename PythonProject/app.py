@@ -104,11 +104,11 @@ def index():
                 session['user'] = {
                     'id':is_User.id,
                     'name':is_User.name,
-                    'age':is_User.age,
+                    'age':int(is_User.age),
                     'email':is_User.email,
                     'password':is_User.password,
-                    'height':is_User.height.decode("utf-8"),
-                    'weight':is_User.weight.decode("utf-8"),
+                    'height':int(is_User.height),
+                    'weight':int(is_User.weight),
                 }
                 if is_User:
                     if bcrypt.checkpw(password.encode(),is_User.password):
@@ -126,8 +126,8 @@ def reg():
         name = request.form['name']
         age = request.form['age']
         password = request.form['password'].encode("utf-8")
-        height = request.form['height'].encode("utf-8")
-        weight = request.form['weight'].encode("utf-8")
+        height = int(request.form['height'])
+        weight = int(request.form['weight'])
         hash_password = bcrypt.hashpw(password,bcrypt.gensalt())
         print(hash_password)
         user = User(email=email,name=name,age=age,password=hash_password, height=height,weight=weight)
@@ -144,6 +144,12 @@ def reg():
 
 @app.route('/training',methods=['GET', 'POST'])
 def training():
+    data_user = session['user']
+    total_water = session.get('total_water', 0)
+    total_calories = session.get('total_calories', 0)
+    user = User(data_user['name'], data_user['age'], data_user['email'], data_user['password'], data_user['height'], data_user['weight'])
+    normal_water = 30*user.weight
+    normal_calories:int = 10*int(user.weight)+6.25*int(user.height)-5*int(user.age)+5
     if request.method == 'POST':
         if "button_test" in request.form:
             return redirect('/test_train')
@@ -156,17 +162,18 @@ def training():
         elif "button_profile" in request.form:
             return redirect('/profile')
         elif "button_main" in request.form:
-            return render_template('training.html')
-        return None
+            return redirect('/training')
+        elif "button_addtrain" in request.form:
+            return redirect('/train')
     else:
-        return render_template('training.html')
+        return render_template('training.html',normal_water=normal_water,total_water=total_water,total_calories=total_calories,normal_calories=normal_calories)
 
 @app.route('/userstable')
 def userstable():
     users = User.query.all()
     users_list = []
     for user in users:
-        users_list.append(f"ID:{user.id} EMAIL:{user.email} NAME:{user.name} AGE:{user.age} PASSWORD:{user.password}")
+        users_list.append(f"ID:{user.id} EMAIL:{user.email} NAME:{user.name} AGE:{user.age} PASSWORD:{user.password} HEIGHT:{user.height} WEIGHT:{user.weight}")
     return jsonify(users_list)
 
 @app.route('/users_water')
@@ -209,6 +216,8 @@ def train():
 
 @app.route('/profile',methods=['GET', 'POST'])
 def profile():
+    data = session.get('user')
+    user = User(data['name'], data['age'], data['email'], data['password'], data['height'], data['weight'])
     if request.method == 'POST':
         if "button_main" in request.form:
             return render_template('training.html')
@@ -217,9 +226,8 @@ def profile():
         if "button_exit" in request.form:
             session.clear()
             return redirect('/')
-    data = session.get('user')
-    user = User(data['name'],data['age'],data['email'],data['password'],data['height'],data['weight'])
-    return render_template('profile.html',username= user.name,email=user.email,age=user.age,height=user.height,weight=user.weight)
+    else:
+        return render_template('profile.html',username= user.name,email=user.email,age=user.age,height=user.height,weight=user.weight)
 
 @app.route('/add_water',methods=['GET', 'POST'])
 def add_water():
@@ -230,13 +238,19 @@ def add_water():
             date_water = datetime.now()
             water_count = request.form.get('count_water')
             water_user = WaterUser(user_id,date_water,water_count)
+            session['water_user'] = {
+                'user_id': user_id,
+                'date_water': date_water,
+                'water_count': water_count
+            }
             try:
                 db.session.add(water_user)
                 db.session.commit()
                 return redirect('/training')
             except Exception as e:
                 return jsonify(e)
-    return render_template('water.html')
+    else:
+        return render_template('water.html')
 
 @app.route('/add_calories',methods=['GET', 'POST'])
 def add_calories():
@@ -253,6 +267,12 @@ def add_calories():
                 return redirect('/training')
             except Exception as e:
                 return jsonify(e)
+    else:
         return render_template('callories.html')
+# @app.route('/clear_users',methods=['GET', 'POST'])
+# def clear_users():
+#     User.query.delete()
+#     db.session.commit()
+#     return jsonify("Успешно удалено!")
 if __name__ == '__main__':
     app.run(debug=True)

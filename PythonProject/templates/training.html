@@ -9,28 +9,48 @@
     <title>Личный кабинет</title>
 </head>
 <body>
-    <form method="post">
-        <div class="app">
-            <div class="card">
+    <form method="POST">
+    <div class="app">
+        <div class="card">
             <h2>Твои тренировки</h2>
-            <button class="btn primary" name="button_train">Перейти</button>
+
+            <button type="submit" name="button_train" class="btn primary">
+                Перейти
+            </button>
+
             <div class="tracker">
-                <h3>Учет каллорий и выпитой воды</h3>
-                <p><strong>Вода:</strong> {{water_count}}/ {{normal_water}}</p>
-                <p><strong>Калории:</strong> {{calories_count}} / {{normal_calories}}</p>
-                <button class="btn secondary" name="button_addWater">Добавить воду</button>
-                <button class="btn secondary" name="button_addCalories">Добавить каллории</button>
+                <h3>Учет калорий и выпитой воды</h3>
+                <p><strong>Вода:</strong> {{ total_water }} / {{ normal_water }}</p>
+                <p><strong>Калории:</strong> {{ total_calories }} / {{ normal_calories }}</p>
+
+                <button type="submit" name="button_addWater" class="btn secondary">
+                    Добавить воду
+                </button>
+
+                <button type="submit" name="button_addCalories" class="btn secondary">
+                    Добавить калории
+                </button>
             </div>
         </div>
-        <button class="btn wide" name="button_test">Пройти тест по подбору тренировки</button>
+
+        <button type="submit" name="button_test" class="btn wide">
+            Пройти тест по подбору тренировки
+        </button>
+
         <div class="bottom-nav">
-            <button class="nav-item" name="button_main">Главная</button>
-            <button class="nav-center" name="button_train">
+            <button type="submit" name="button_main" class="nav-item">
+                Главная
+            </button>
+
+            <button type="submit" name="button_addtrain" class="nav-center">
                 +
             </button>
-            <button class="nav-item" name="button_profile">Профиль</button>
-            </div>
+
+            <button type="submit" name="button_profile" class="nav-item">
+                Профиль
+            </button>
         </div>
-    </form>
+    </div>
+</form>
 </body>
 </html>
