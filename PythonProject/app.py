@@ -1,11 +1,8 @@
 from datetime import datetime
-from io import BytesIO
 from flask import Flask, render_template,url_for,request,redirect,jsonify,session,send_file
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 import bcrypt
-import os
-from pyexpat.errors import messages
 
 app = Flask(__name__)
 app.secret_key = 'supersecretkey'
