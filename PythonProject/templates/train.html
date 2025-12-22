@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="{{url_for('static',filename='css/train.css')}}">
+    <title>Тренировки</title>
+</head>
+<body>
+    <form method="POST">
+    <div class="page" id="page1" style="display: {{ train1 }};">
+        <div class="container">
+            <div class="day-tabs">
+                <button type="submit" name="button_train1" class="btn primary">ДЕНЬ 1</button>
+                <button type="submit" name="button_train2" class="btn primary">ДЕНЬ 2</button>
+                <button type="submit" name="button_train3" class="btn primary">ДЕНЬ 3</button>
+            </div>
+
+            <div class="workout-plan">
+                <h2>Разминка</h2>
+                <p>Легкий бег - 5 минут</p>
+
+                <h2>Тренировка</h2>
+                <ol>
+                    <li>
+                        <strong>{{ train1 }}</strong>
+                        <br>{{ train1_count1 }} подходы * {{ train1_count2 }} повторений
+                    </li>
+                    <li>
+                        <strong>{{ train2 }}</strong>
+                        <br>{{ train2_count1 }} подходы * {{ train2_count2 }} повторений
+                    </li>
+                    <li>
+                        <strong>{{ train3 }}</strong>
+                        <br>{{ train3_count1 }} подходы * {{ train3_count2 }} повторений
+                    </li>
+                    <li>
+                        <strong>{{ train4 }}</strong>
+                        <br>{{ train4_count1 }} подходы * {{ train4_count2 }} повторений
+                    </li>
+                    <li>
+                        <strong>{{ train5 }}</strong>
+                        <br>{{ train5_count1 }} подходы * {{ train5_count2 }} повторений
+                    </li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="bottom-nav">
+            <button type="submit" name="button_main" class="nav-item">
+                Главная
+            </button>
+
+            <button type="submit" name="button_addtrain" class="nav-center">
+                +
+            </button>
+
+            <button type="submit" name="button_profile" class="nav-item">
+                Профиль
+            </button>
+        </div>
+    </div>
+    <div class="page" id="page2" style="display: {{ train2 }};">
+        <div class="container">
+            <div class="day-tabs">
+                <button type="submit" name="button_train1" class="btn primary">ДЕНЬ 1</button>
+                <button type="submit" name="button_train2" class="btn primary">ДЕНЬ 2</button>
+                <button type="submit" name="button_train3" class="btn primary">ДЕНЬ 3</button>
+            </div>
+
+            <div class="workout-plan">
+                <h2>Разминка</h2>
+                <p>Легкий бег - 5 минут</p>
+
+                <h2>Тренировка</h2>
+                <ol>
+                    <li>
+                        <strong>{{ train1 }}</strong>
+                        <br>{{ train1_count1 }} подходы * {{ train1_count2 }} повторений
+                    </li>
+                    <li>
+                        <strong>{{ train2 }}</strong>
+                        <br>{{ train2_count1 }} подходы * {{ train2_count2 }} повторений
+                    </li>
+                    <li>
+                        <strong>{{ train3 }}</strong>
+                        <br>{{ train3_count1 }} подходы * {{ train3_count2 }} повторений
+                    </li>
+                    <li>
+                        <strong>{{ train4 }}</strong>
+                        <br>{{ train4_count1 }} подходы * {{ train4_count2 }} повторений
+                    </li>
+                    <li>
+                        <strong>{{ train5 }}</strong>
+                        <br>{{ train5_count1 }} подходы * {{ train5_count2 }} повторений
+                    </li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="bottom-nav">
+            <button type="submit" name="button_main" class="nav-item">
+                Главная
+            </button>
+
+            <button type="submit" name="button_addtrain" class="nav-center">
+                +
+            </button>
+
+            <button type="submit" name="button_profile" class="nav-item">
+                Профиль
+            </button>
+        </div>
+    </div>
+    <div class="page" id="page3" style="display: {{ train3 }};">
+        <div class="container">
+            <div class="day-tabs">
+                <button type="submit" name="button_train1" class="btn primary">ДЕНЬ 1</button>
+                <button type="submit" name="button_train2" class="btn primary">ДЕНЬ 2</button>
+                <button type="submit" name="button_train3" class="btn primary">ДЕНЬ 3</button>
+            </div>
+
+            <div class="workout-plan">
+                <h2>Разминка</h2>
+                <p>Легкий бег - 5 минут</p>
+
+                <h2>Тренировка</h2>
+                <ol>
+                    <li>
+                        <strong>{{ train1 }}</strong>
+                        <br>{{ train1_count1 }} подходы * {{ train1_count2 }} повторений
+                    </li>
+                    <li>
+                        <strong>{{ train2 }}</strong>
+                        <br>{{ train2_count1 }} подходы * {{ train2_count2 }} повторений
+                    </li>
+                    <li>
+                        <strong>{{ train3 }}</strong>
+                        <br>{{ train3_count1 }} подходы * {{ train3_count2 }} повторений
+                    </li>
+                    <li>
+                        <strong>{{ train4 }}</strong>
+                        <br>{{ train4_count1 }} подходы * {{ train4_count2 }} повторений
+                    </li>
+                    <li>
+                        <strong>{{ train5 }}</strong>
+                        <br>{{ train5_count1 }} подходы * {{ train5_count2 }} повторений
+                    </li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="bottom-nav">
+            <button type="submit" name="button_main" class="nav-item">
+                Главная
+            </button>
+
+            <button type="submit" name="button_addtrain" class="nav-center">
+                +
+            </button>
+
+            <button type="submit" name="button_profile" class="nav-item">
+                Профиль
+            </button>
+        </div>
+    </div>
+</form>
+</body>
+</html>

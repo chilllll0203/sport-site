@@ -212,8 +212,37 @@ def test_train():
 
 @app.route('/train',methods=['GET', 'POST'])
 def train():
-    print("Вы перешли на страницу с вашими тренировками")
-
+    pages = {'train1':'block','train2':'none','train3':'none'}
+    if request.method == 'POST':
+        if "button_train1" in request.form:
+            name = 'train1'
+            if name in pages:
+                pages[name] = 'block'
+                pages['train2'] = 'none'
+                pages['train3'] = 'none'
+            return render_template('train.html', **pages)
+        elif "button_train2" in request.form:
+            name = 'train2'
+            if name in pages:
+                pages[name] = 'block'
+                pages['train1'] = 'none'
+                pages['train3'] = 'none'
+            return render_template('train.html', **pages)
+        elif "button_train3" in request.form:
+            name = 'train3'
+            if name in pages:
+                pages[name] = 'block'
+                pages['train1'] = 'none'
+                pages['train2'] = 'none'
+            return render_template('train.html', **pages)
+        elif "button_profile" in request.form:
+            return redirect('/profile')
+        elif "button_main" in request.form:
+            return redirect('/training')
+        elif "button_addtrain" in request.form:
+            return redirect('/train')
+    else:
+        return render_template('train.html',**pages)
 @app.route('/profile',methods=['GET', 'POST'])
 def profile():
     data = session.get('user')

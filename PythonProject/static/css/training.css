@@ -92,3 +92,14 @@ html,body {
     font-size: 28px;
     cursor: pointer;
 }
+/* Адаптивность */
+@media (max-width: 480px) {
+    .container {
+        padding: 15px;
+    }
+    .btn-primary,
+    .btn-secondary {
+        padding: 10px 15px;
+        font-size: 14px;
+    }
+}
