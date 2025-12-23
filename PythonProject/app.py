@@ -7,6 +7,7 @@ from flask import Flask, render_template,url_for,request,redirect,jsonify,sessio
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 import bcrypt
+from datetime import date
 
 app = Flask(__name__)
 app.secret_key = 'supersecretkey'
@@ -40,7 +41,7 @@ class TestAnswer(db.Model):
     answer1 = db.Column(db.String(200))
     answer2 = db.Column(db.String(200))
     answer3 = db.Column(db.String(200))
-    user = db.relationship('User',foreign_keys=[user_id])
+    user = db.relationship('User',backref='test_answers')
     def __init__(self,user_id,answer1,answer2,answer3):
         self.user_id = user_id
         self.answer1 = answer1
@@ -51,9 +52,9 @@ class WaterUser(db.Model):
     __tablename__ = 'water_users'
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    date = db.Column(db.DateTime,default=datetime.utcnow)
+    date = db.Column(db.Date,default=date.today)
     count = db.Column(db.Integer,default=0)
-    user = db.relationship('User',foreign_keys=[user_id])
+    user = db.relationship('User',backref='water_logs')
     def __init__(self,user_id,date,count):
         self.user_id = user_id
         self.date = date
@@ -63,9 +64,9 @@ class CaloriesUser(db.Model):
     __tablename__ = 'calories_users'
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    date = db.Column(db.DateTime,default=datetime.utcnow)
+    date = db.Column(db.Date,default=date.today)
     count = db.Column(db.Integer,default=0)
-    user = db.relationship('User',foreign_keys=[user_id])
+    user = db.relationship('User',backref='calories_logs')
     def __init__(self,user_id,date,count):
         self.user_id = user_id
         self.date = date
@@ -75,7 +76,7 @@ class WeeklyProgram(db.Model):
     __tablename__ = 'weekly_programs'
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'),nullable=False)
-    user = db.relationship('User',foreign_keys=[user_id])
+    user = db.relationship('User',backref='weekly_programs')
     def __init__(self,user_id):
         self.user_id = user_id
 
@@ -84,7 +85,7 @@ class TrainingDay(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     program_id = db.Column(db.Integer, db.ForeignKey('weekly_programs.id'),nullable=False)
     day_of_week = db.Column(db.String(20),nullable=False)
-    program = db.relationship('WeeklyProgram',foreign_keys=[program_id])
+    program = db.relationship('WeeklyProgram',backref='training_days')
     def __init__(self,program_id,day_of_week):
         self.program_id = program_id
         self.day_of_week = day_of_week
@@ -96,7 +97,7 @@ class Exercise(db.Model):
     name = db.Column(db.String(200),nullable=False)
     sets = db.Column(db.Integer,nullable=False)
     reps = db.Column(db.Integer,nullable=False)
-    training_day = db.relationship('TrainingDay',foreign_keys=[training_id])
+    training_day = db.relationship('TrainingDay',backref='exercises')
     def __init__(self,training_id,name,sets,reps):
         self.training_id = training_id
         self.name = name
@@ -159,8 +160,10 @@ def reg():
 @app.route('/training',methods=['GET', 'POST'])
 def training():
     data_user = session['user']
-    total_water = session.get('total_water', 0)
-    total_calories = session.get('total_calories', 0)
+    water:WaterUser = WaterUser.query.filter_by(user_id=data_user['id'],date=date.today()).first()
+    calories:CaloriesUser = CaloriesUser.query.filter_by(user_id=data_user['id'],date=date.today()).first()
+    total_water = water.count if water else 0
+    total_calories = calories.count if calories else 0
     user = User(data_user['name'], data_user['age'], data_user['email'], data_user['password'], data_user['height'], data_user['weight'])
     normal_water = 30*user.weight
     normal_calories:int = 10*int(user.weight)+6.25*int(user.height)-5*int(user.age)+5
@@ -217,7 +220,7 @@ def test_train():
             id_user = data['id']
             test_user = TestAnswer(id_user, answer1, answer2, answer3)
             workout_planUser = get_train(data['height'], data['weight'],answer1,answer2,answer3)
-            weeklyprogramUser = WeeklyProgram.query.filter_by(id_user=id_user).first()
+            weeklyprogramUser = WeeklyProgram.query.filter_by(user_id=id_user).first()
             for day in workout_planUser:
                 training_day = TrainingDay(weeklyprogramUser.id, day['day'])
                 db.session.add(training_day)
@@ -236,30 +239,48 @@ def test_train():
 
 @app.route('/train',methods=['GET', 'POST'])
 def train():
-    pages = {'train1':'block','train2':'none','train3':'none'}
+    data_user = session['user']
+    user_id = data_user['id']
+    program = WeeklyProgram.query.filter_by(user_id=user_id).first()
+    training_days = TrainingDay.query.filter_by(program_id=program.id).all()
+    day_exercises = {}
+    for day in training_days:
+        exercises = Exercise.query.filter_by(training_id=day.id).all()
+        day_exercises[day.day_of_week] = exercises
+    pages = {'train1_': 'none', 'train2_': 'none', 'train3_': 'none'}
+    def get_exercise_data(day_key, exercises_list, count=5):
+        data = {}
+        for i in range(count):
+            if i < len(exercises_list):
+                ex = exercises_list[i]
+                data[f'train{i+1}'] = ex.name
+                data[f'train{i+1}_count1'] = ex.sets
+                data[f'train{i+1}_count2'] = ex.reps
+            else:
+                data[f'train{i+1}'] = "—"
+                data[f'train{i+1}_count1'] = 0
+                data[f'train{i+1}_count2'] = 0
+        return data
+
     if request.method == 'POST':
         if "button_train1" in request.form:
-            name = 'train1'
-            if name in pages:
-                pages[name] = 'block'
-                pages['train2'] = 'none'
-                pages['train3'] = 'none'
-            list_exercises = Exercise.query.filter_by()
-            return render_template('train.html', **pages)
+            pages['train1_'] = 'block'
+            exercises = day_exercises.get('1', [])
+            extra_data = get_exercise_data('1', exercises)
+            return render_template('train.html', **pages, **extra_data)
+
         elif "button_train2" in request.form:
-            name = 'train2'
-            if name in pages:
-                pages[name] = 'block'
-                pages['train1'] = 'none'
-                pages['train3'] = 'none'
-            return render_template('train.html', **pages)
+            pages['train2_'] = 'block'
+            exercises = day_exercises.get('2', [])
+            extra_data = get_exercise_data('2', exercises)
+            return render_template('train.html', **pages, **extra_data)
+
         elif "button_train3" in request.form:
-            name = 'train3'
-            if name in pages:
-                pages[name] = 'block'
-                pages['train1'] = 'none'
-                pages['train2'] = 'none'
-            return render_template('train.html', **pages)
+            pages['train3_'] = 'block'
+            exercises = day_exercises.get('3', [])
+            extra_data = get_exercise_data('3', exercises)
+            return render_template('train.html', **pages, **extra_data)
+
         elif "button_profile" in request.form:
             return redirect('/profile')
         elif "button_main" in request.form:
@@ -267,14 +288,18 @@ def train():
         elif "button_addtrain" in request.form:
             return redirect('/train')
     else:
-        return render_template('train.html',**pages)
+        pages['train1_'] = 'block'
+        exercises = day_exercises.get('1', [])
+        extra_data = get_exercise_data('1', exercises)
+        return render_template('train.html', **pages, **extra_data)
+
 @app.route('/profile',methods=['GET', 'POST'])
 def profile():
     data = session.get('user')
     user = User(data['name'], data['age'], data['email'], data['password'], data['height'], data['weight'])
     if request.method == 'POST':
         if "button_main" in request.form:
-            return render_template('training.html')
+            return redirect('training')
         elif "button_train" in request.form:
             return redirect('/train')
         if "button_exit" in request.form:
@@ -289,14 +314,9 @@ def add_water():
         if "button_addWater" in request.form:
             data = session.get('user')
             user_id = data['id']
-            date_water = datetime.now()
+            date_water = datetime.now().date()
             water_count = request.form.get('count_water')
             water_user = WaterUser(user_id,date_water,water_count)
-            session['water_user'] = {
-                'user_id': user_id,
-                'date_water': date_water,
-                'water_count': water_count
-            }
             try:
                 db.session.add(water_user)
                 db.session.commit()
@@ -312,7 +332,7 @@ def add_calories():
         if "button_addCalories" in request.form:
             data = session.get('user')
             user_id = data['id']
-            date_calories = datetime.now()
+            date_calories = datetime.now().date()
             calories_count = request.form.get('count_calories')
             calories_user = CaloriesUser(user_id,date_calories,calories_count)
             try:
@@ -326,7 +346,7 @@ def add_calories():
 
 def get_train(height, weight, answer1, answer2, answer3):
     prompt = {
-        "modelUri": "gpt://b1gc2itrie9cbggfhprv/yandexgpt-lite",
+        "modelUri": "gpt://<ваш id каталога>/yandexgpt-lite",
         "completionOptions": {
             "stream": False,
             "temperature": 0.6,
@@ -367,7 +387,7 @@ def get_train(height, weight, answer1, answer2, answer3):
     url = "https://llm.api.cloud.yandex.net/foundationModels/v1/completion"
     headers = {
         "Content-Type": "application/json",
-        "Authorization": "Api-Key"
+        "Authorization": "Api-Key <ваш ключ>"
     }
     response = requests.post(url, json=prompt, headers=headers)
     response_text = json.loads(response.text)
@@ -378,7 +398,5 @@ def get_train(height, weight, answer1, answer2, answer3):
         code_str = raw_text.strip()
     workout_plan = ast.literal_eval(code_str)
     return workout_plan
-
 if __name__ == '__main__':
-    get_train(170,60,"Для набора мышечной массы","Нет","Нет")
     app.run(debug=True)
