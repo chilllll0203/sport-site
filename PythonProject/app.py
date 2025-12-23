@@ -1,4 +1,8 @@
+import ast
+import json
 from datetime import datetime
+
+import requests
 from flask import Flask, render_template,url_for,request,redirect,jsonify,session,send_file
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
@@ -72,6 +76,8 @@ class WeeklyProgram(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'),nullable=False)
     user = db.relationship('User',foreign_keys=[user_id])
+    def __init__(self,user_id):
+        self.user_id = user_id
 
 class TrainingDay(db.Model):
     __tablename__ = 'training_days'
@@ -79,6 +85,9 @@ class TrainingDay(db.Model):
     program_id = db.Column(db.Integer, db.ForeignKey('weekly_programs.id'),nullable=False)
     day_of_week = db.Column(db.String(20),nullable=False)
     program = db.relationship('WeeklyProgram',foreign_keys=[program_id])
+    def __init__(self,program_id,day_of_week):
+        self.program_id = program_id
+        self.day_of_week = day_of_week
 
 class Exercise(db.Model):
     __tablename__ = 'exercises'
@@ -88,7 +97,11 @@ class Exercise(db.Model):
     sets = db.Column(db.Integer,nullable=False)
     reps = db.Column(db.Integer,nullable=False)
     training_day = db.relationship('TrainingDay',foreign_keys=[training_id])
-
+    def __init__(self,training_id,name,sets,reps):
+        self.training_id = training_id
+        self.name = name
+        self.sets = sets
+        self.reps = reps
 
 @app.route('/',methods=['GET', 'POST'])
 def index():
@@ -131,6 +144,10 @@ def reg():
         try:
             if "register_btn" in request.form:
                 db.session.add(user)
+                db.session.commit()
+                id_user = User.query.filter_by(email=email).first()
+                weeklyprogramUser = WeeklyProgram(id_user.id)
+                db.session.add(weeklyprogramUser)
                 db.session.commit()
                 return redirect('/')
         except Exception as e:
@@ -199,6 +216,16 @@ def test_train():
             data = session.get('user')
             id_user = data['id']
             test_user = TestAnswer(id_user, answer1, answer2, answer3)
+            workout_planUser = get_train(data['height'], data['weight'],answer1,answer2,answer3)
+            weeklyprogramUser = WeeklyProgram.query.filter_by(id_user=id_user).first()
+            for day in workout_planUser:
+                training_day = TrainingDay(weeklyprogramUser.id, day['day'])
+                db.session.add(training_day)
+                db.session.commit()
+                for exercise in day['exercises']:
+                    exercise_train = Exercise(training_day.id, exercise['name'],exercise['sets'],exercise['reps'])
+                    db.session.add(exercise_train)
+                    db.session.commit()
             try:
                 db.session.add(test_user)
                 db.session.commit()
@@ -217,6 +244,7 @@ def train():
                 pages[name] = 'block'
                 pages['train2'] = 'none'
                 pages['train3'] = 'none'
+            list_exercises = Exercise.query.filter_by()
             return render_template('train.html', **pages)
         elif "button_train2" in request.form:
             name = 'train2'
@@ -295,10 +323,62 @@ def add_calories():
                 return jsonify(e)
     else:
         return render_template('callories.html')
-# @app.route('/clear_users',methods=['GET', 'POST'])
-# def clear_users():
-#     User.query.delete()
-#     db.session.commit()
-#     return jsonify("Успешно удалено!")
+
+def get_train(height, weight, answer1, answer2, answer3):
+    prompt = {
+        "modelUri": "gpt://b1gc2itrie9cbggfhprv/yandexgpt-lite",
+        "completionOptions": {
+            "stream": False,
+            "temperature": 0.6,
+            "maxTokens": "1000"
+        },
+        "messages": [
+            {
+                "role": "system",
+                "text": "Ты ассистент подбора тренировки на неделю."
+            },
+            {
+                "role": "user",
+                "text": f"Выведи ответ в виде компактного однострочного списка на Python без пробелов и переносов, чтобы его можно было сразу вставить в код. Составь план тренировок на 3 дня по 5 упражений на день на основе следующих данных:"
+                        f"- Рост: {height} см"
+                        f"- Вес: {weight} кг"
+                        f"- Цель тренировок: {answer1}"
+                        f"- Уровень физической подготовки: {answer2}"
+                        f"- Ограничения по здоровью или травмы: {answer3}"
+                        f"Выведи результат строго в виде списка Python-словарей. Каждый день — отдельный элемент списка."
+                        f"Внутри каждого словаря должен быть ключ day (номер дня: 1, 2 или 3) и ключ exercises, значение которого — список упражнений."
+                        f" Каждое упражнение — это словарь с ключами: name (название упражнения), sets (количество подходов), reps (количество повторений на подход)."
+                        f"Не добавляй пояснений, комментариев или дополнительного текста — только валидный Python-список."
+                        f"Пример как надо сделать:"
+                        f"Формат ответа должен быть валидным Python-литералом, как в этом примере:"
+                        f"["
+                        f"{{"
+                        f"day: 1,"
+                        f"exercises: ["
+                        f"{{name: Отжимания, sets: 3, reps: 12}},"
+                        f"{{name: Приседания, sets: 4, reps: 15}}"
+                        f"]"
+                        f"}}"
+                        f"]"
+                        f"Не добавляй текст до или после — только список."
+            }
+        ]
+    }
+    url = "https://llm.api.cloud.yandex.net/foundationModels/v1/completion"
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": "Api-Key"
+    }
+    response = requests.post(url, json=prompt, headers=headers)
+    response_text = json.loads(response.text)
+    raw_text = response_text["result"]["alternatives"][0]["message"]["text"]
+    if raw_text.startswith("```") and raw_text.endswith("```"):
+        code_str = raw_text[3:-3].strip()
+    else:
+        code_str = raw_text.strip()
+    workout_plan = ast.literal_eval(code_str)
+    return workout_plan
+
 if __name__ == '__main__':
+    get_train(170,60,"Для набора мышечной массы","Нет","Нет")
     app.run(debug=True)
