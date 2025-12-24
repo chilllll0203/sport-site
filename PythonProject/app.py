@@ -50,7 +50,7 @@ class WaterUser(db.Model):
     __tablename__ = 'water_users'
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    _date = db.Column(db.Date,default=date.today)
+    _date = db.Column(db.Date,default=date.today())
     count = db.Column(db.Integer,default=0)
     user = db.relationship('User',backref='water_logs')
     def __init__(self,user_id,_date,count):
@@ -62,7 +62,7 @@ class CaloriesUser(db.Model):
     __tablename__ = 'calories_users'
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    _date = db.Column(db.Date,default=date.today)
+    _date = db.Column(db.Date,default=date.today())
     count = db.Column(db.Integer,default=0)
     user = db.relationship('User',backref='calories_logs')
     def __init__(self,user_id,_date,count):
@@ -312,7 +312,7 @@ def add_water():
         if "button_addWater" in request.form:
             data = session.get('user')
             user_id = data['id']
-            date_water = date.today
+            date_water = date.today()
             water_count = request.form.get('count_water')
             water_user = WaterUser(user_id,date_water,water_count)
             try:
@@ -330,7 +330,7 @@ def add_calories():
         if "button_addCalories" in request.form:
             data = session.get('user')
             user_id = data['id']
-            date_calories = date.today
+            date_calories = date.today()
             calories_count = request.form.get('count_calories')
             calories_user = CaloriesUser(user_id,date_calories,calories_count)
             try:
