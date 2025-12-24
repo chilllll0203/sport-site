@@ -1,7 +1,5 @@
 import ast
 import json
-from datetime import datetime
-
 import requests
 from flask import Flask, render_template,url_for,request,redirect,jsonify,session,send_file
 from flask_sqlalchemy import SQLAlchemy
@@ -52,24 +50,24 @@ class WaterUser(db.Model):
     __tablename__ = 'water_users'
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    date = db.Column(db.Date,default=date.today)
+    _date = db.Column(db.Date,default=date.today)
     count = db.Column(db.Integer,default=0)
     user = db.relationship('User',backref='water_logs')
-    def __init__(self,user_id,date,count):
+    def __init__(self,user_id,_date,count):
         self.user_id = user_id
-        self.date = date
+        self._date = _date
         self.count = count
 
 class CaloriesUser(db.Model):
     __tablename__ = 'calories_users'
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    date = db.Column(db.Date,default=date.today)
+    _date = db.Column(db.Date,default=date.today)
     count = db.Column(db.Integer,default=0)
     user = db.relationship('User',backref='calories_logs')
-    def __init__(self,user_id,date,count):
+    def __init__(self,user_id,_date,count):
         self.user_id = user_id
-        self.date = date
+        self._date = _date
         self.count = count
 
 class WeeklyProgram(db.Model):
@@ -160,8 +158,8 @@ def reg():
 @app.route('/training',methods=['GET', 'POST'])
 def training():
     data_user = session['user']
-    water:WaterUser = WaterUser.query.filter_by(user_id=data_user['id'],date=date.today()).first()
-    calories:CaloriesUser = CaloriesUser.query.filter_by(user_id=data_user['id'],date=date.today()).first()
+    water:WaterUser = WaterUser.query.filter_by(user_id=data_user['id'],_date=date.today()).first()
+    calories:CaloriesUser = CaloriesUser.query.filter_by(user_id=data_user['id'],_date=date.today()).first()
     total_water = water.count if water else 0
     total_calories = calories.count if calories else 0
     user = User(data_user['name'], data_user['age'], data_user['email'], data_user['password'], data_user['height'], data_user['weight'])
@@ -198,7 +196,7 @@ def users_water_table():
     users_water = WaterUser.query.all()
     water_list = []
     for user_water in users_water:
-        water_list.append(f"ID:{user_water.id} ID USER: {user_water.user_id} DATE: {user_water.date} COUNT: {user_water.count}")
+        water_list.append(f"ID:{user_water.id} ID USER: {user_water.user_id} DATE: {user_water._date} COUNT: {user_water.count}")
     return jsonify(water_list)
 
 @app.route('/users_calories')
@@ -206,7 +204,7 @@ def users_calories_table():
     users_calories = CaloriesUser.query.all()
     calories_list = []
     for user_water in users_calories:
-        calories_list.append(f"ID:{user_water.id} ID USER: {user_water.user_id} DATE: {user_water.date} COUNT: {user_water.count}")
+        calories_list.append(f"ID:{user_water.id} ID USER: {user_water.user_id} DATE: {user_water._date} COUNT: {user_water.count}")
     return jsonify(calories_list)
 
 @app.route('/test_train',methods=['GET', 'POST'])
@@ -314,7 +312,7 @@ def add_water():
         if "button_addWater" in request.form:
             data = session.get('user')
             user_id = data['id']
-            date_water = datetime.now().date()
+            date_water = date.today
             water_count = request.form.get('count_water')
             water_user = WaterUser(user_id,date_water,water_count)
             try:
@@ -332,7 +330,7 @@ def add_calories():
         if "button_addCalories" in request.form:
             data = session.get('user')
             user_id = data['id']
-            date_calories = datetime.now().date()
+            date_calories = date.today
             calories_count = request.form.get('count_calories')
             calories_user = CaloriesUser(user_id,date_calories,calories_count)
             try:
